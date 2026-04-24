@@ -6,7 +6,7 @@ ENV/
 # Archivos de configuración y secretos
 instance/
 .webassets-cache
-secret_key
+secret_key.py
 
 # Base de datos de conocimiento (RAG)
 conocimiento_cecyt16.txt
