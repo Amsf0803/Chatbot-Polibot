@@ -1,4 +1,0 @@
-import secrets
-print(secrets.token_hex(32))
-
-#2fa71559dc6301ada2cdadddb3775fda9f9cb11eea491710265030a1e020ae96
