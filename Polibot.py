@@ -2,14 +2,44 @@ from flask import Flask, request, jsonify, render_template
 import ollama 
 import chromadb
 import os
+from dotenv import load_dotenv
+import subprocess
+import time
+import urllib.request
+from urllib.error import URLError
+
+
+
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "2fa71559dc6301ada2cdadddb3775fda9f9cb11eea491710265030a1e020ae96"
+
+# Lee la clave secreta. Si por alguna razón no encuentra el archivo .env, 
+# usa una clave genérica de respaldo (útil para pruebas).
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "clave_por_defecto_desarrollo")
+
 
 # --- 1. CONFIGURACIÓN DE LA BASE VECTORIAL ---
 chroma_client = chromadb.Client()
 # get_or_create_collection evita errores si la base ya existe
 collection = chroma_client.get_or_create_collection(name="memoria_cecyt16")
+
+
+def asegurar_ollama():
+    try:
+        # Intentamos hacer ping al puerto de Ollama para ver si ya está vivo
+        urllib.request.urlopen("http://127.0.0.1:11434")
+        print("✅ Servidor de Ollama detectado.")
+    except URLError:
+        print("⏳ El servidor de Ollama está apagado. Iniciándolo en segundo plano...")
+        # Abrimos Ollama en segundo plano. DEVNULL oculta los logs de Ollama para no ensuciar tu terminal de Flask
+        subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        # Le damos 3 segundos al motor para que arranque correctamente antes de seguir
+        time.sleep(3)
+        print("✅ Servidor de Ollama iniciado con éxito.")
+
 
 def inicializar_base_vectorial():
     ruta = "conocimiento_cecyt16.txt"
@@ -34,7 +64,9 @@ def inicializar_base_vectorial():
         )
     print("✅ ¡Base de datos vectorial lista!")
 
-# Ejecutamos la carga antes de arrancar las rutas
+
+# Ejecutamos esto antes de cargar ChromaDB
+asegurar_ollama()
 inicializar_base_vectorial()
 
 historiales = {}
@@ -44,8 +76,10 @@ def get_historial(session_id):
         # El system prompt ahora es más general, porque los datos exactos se inyectan dinámicamente
         historiales[session_id] = [
             {"role": "system", "content": "Eres un asistente virtual oficial del CECyT 16 en Pachuca, Hidalgo. "
-            "Tu objetivo es ayudar con trámites y dudas de la escuela. Usa la información de 'Contexto de la escuela' que se te proporcione para responder. "
-            "Da respuestas concisas. Si no tienes la información exacta en el contexto, di: 'Perdón, no tengo esa información actualmente, te sugiero checar la página oficial'."}
+            "Tu objetivo es ayudar con trámites y dudas de la escuela. Usa el contexto proporcionado. "
+            "REGLAS CRÍTICAS: 1. Si preguntan por ubicación, usa [MAPA_UBICACION] y NO menciones la composición/diagrama. "
+            "2. Si preguntan por organización/composición/mapa interno, usa [DIAGRAMA_ESCUELA] y NO menciones la dirección física ni uses el mapa de ubicación. "
+            "Da respuestas concisas."}
         ]
     return historiales[session_id]
 
@@ -63,8 +97,18 @@ def chat():
     historial = get_historial(session_id)
 
     # --- MAGIA DEL RAG (Búsqueda Vectorial) ---
-    # 1. Convertir la pregunta del usuario a vector
-    vector_pregunta = ollama.embeddings(model="nomic-embed-text", prompt=mensaje_usuario)["embedding"]
+
+    # 1. Convertir la pregunta del usuario a vector (con memoria de contexto)
+    texto_para_buscar = mensaje_usuario
+    
+    # Si ya hay historial previo (System + User + AI = mínimo 3 mensajes), 
+    # le pegamos la pregunta anterior para darle contexto a ChromaDB.
+    if len(historial) >= 3:
+        pregunta_anterior = historial[-2]["content"] # Extrae lo que el usuario preguntó antes
+        texto_para_buscar = f"{pregunta_anterior}. {mensaje_usuario}"
+        
+    vector_pregunta = ollama.embeddings(model="nomic-embed-text", prompt=texto_para_buscar)["embedding"]
+
     
     # 2. Buscar los 2 fragmentos de información más relevantes en ChromaDB
     resultados = collection.query(query_embeddings=[vector_pregunta], n_results=2)
@@ -91,6 +135,16 @@ def chat():
 
     mensaje_ia = respuesta["message"]["content"]
     
+    # PROCESAMIENTO EXTRA: Mostrar mapa si piden ubicación
+    if "[MAPA_UBICACION]" in mensaje_ia:
+        mapa_html = '<div style="position: relative; width: 100%; height: 200px; border-radius: 10px; overflow: hidden; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><iframe src="https://maps.google.com/maps?q=CECyT%2016%20Hidalgo,%20San%20Agust%C3%ADn%20Tlaxiaca&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen></iframe><a href="https://www.google.com/maps/search/CECyT+16+Hidalgo" target="_blank" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10; background:rgba(255,255,255,0.01);" title="Abrir en Google Maps"></a></div><p style="font-size: 0.8rem; text-align: center; margin-top: 5px; color: var(--text-gray);"><i>Da clic en el mapa para abrir en Google Maps</i></p>'
+        mensaje_ia = mensaje_ia.replace("[MAPA_UBICACION]", mapa_html)
+
+    # PROCESAMIENTO EXTRA: Mostrar diagrama (Placeholder)
+    if "[DIAGRAMA_ESCUELA]" in mensaje_ia:
+        diagrama_html = '<div style="margin-top: 10px; padding: 15px; border: 2px dashed #6B1C3A; border-radius: 10px; background: #fff5f8; text-align: center;"><p style="color: #6B1C3A; font-weight: bold;">[ PRÓXIMAMENTE: DIAGRAMA DE COMPOSICIÓN ]</p><p style="font-size: 0.85rem; color: #555;">Aquí se mostrará el diagrama detallado de la organización y distribución de los edificios del CECyT 16.</p></div>'
+        mensaje_ia = mensaje_ia.replace("[DIAGRAMA_ESCUELA]", diagrama_html)
+
     # Guardamos la respuesta de la IA en el historial real
     historial.append({"role": "assistant", "content": mensaje_ia})
 

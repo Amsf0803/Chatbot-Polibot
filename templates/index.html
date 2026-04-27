@@ -150,6 +150,7 @@
             color: var(--text-dark);
             border-radius: 18px 18px 18px 4px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #d1d1d1; /* Añadido borde para marcarlo más */
         }
 
         .chat-input-container {
@@ -164,7 +165,7 @@
         .chat-input-container input {
             flex: 1;
             padding: 14px 20px;
-            border: 1px solid #e4e6eb;
+            border: 2px solid #aaaaaa; /* Gris más oscuro y borde más grueso */
             background-color: #f0f2f5;
             border-radius: 30px;
             outline: none;
@@ -326,7 +327,12 @@
 
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', sender);
-            msgDiv.textContent = text;
+            
+            if (sender === 'bot') {
+                msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+            } else {
+                msgDiv.textContent = text;
+            }
             
             wrapper.appendChild(msgDiv);
             

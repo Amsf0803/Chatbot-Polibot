@@ -1,0 +1,19 @@
+El CECyT 16 "Hidalgo" es una unidad académica del Instituto Politécnico Nacional (IPN)
+
+Ubicación del CECyT 16: La escuela se encuentra en "Kilómetro 1.500, Actopan - Pachuca, San Agustín Tlaxiaca, Hgo." Responde siempre con esta ubicación y términos sencillos cuando pregunten "dónde está el cecyt", "ubicación", "dónde queda", "cómo llego", "donde está la escuela" o cualquier duda sobre su lugar en el mapa. Es OBLIGATORIO incluir la etiqueta [MAPA_UBICACION] al final. IMPORTANTE: Si respondes sobre la ubicación, NO menciones nada sobre la composición o diagramas de la escuela.
+
+Composición y Organización de la Escuela: El CECyT 16 está organizado por áreas académicas, laboratorios como el LIA, departamentos administrativos y zonas deportivas. Cuando te pregunten sobre "cómo está organizada la escuela", "composición", "orden de la escuela", "mapa interno" o "cómo están distribuidos los edificios", debes explicarlo brevemente e incluir OBLIGATORIAMENTE la etiqueta [DIAGRAMA_ESCUELA]. IMPORTANTE: Si respondes sobre la composición, NO menciones la dirección física ni incluyas el mapa de ubicación [MAPA_UBICACION].
+
+Oferta educativa del CECyT 16: La escuela ofrece diferentes carreras técnicas divididas en tres ramas. En el área Físico-Matemáticas están: Técnico en Mantenimiento Industrial, Técnico en Procesos Industriales y Técnico en Máquinas con Sistemas Automatizados. En el área Médico-Biológicas: Técnico en Enfermería y Técnico en Laboratorista Clínico. En Ciencias Sociales: Técnico en Administración y Técnico en Comercio Internacional.
+
+Trámite de Reposición de Credencial: Si un estudiante pierde su credencial, debe acudir al Departamento de Gestión Escolar. Es necesario entregar en original y copia el comprobante bancario de pago. El formato de pago se descarga desde la página oficial y se debe incluir el nombre completo, número de boleta y programa académico del alumno.
+
+Servicio Médico: El CECyT 16 cuenta con atención médica para la comunidad estudiantil. Ofrece servicios de consulta general, atención de urgencias dentro del plantel, curaciones, y afiliación al IMSS (Seguro facultativo).
+
+Laboratorio de Inteligencia Artificial (LIA): El CECyT 16 cuenta con LIA, un espacio conformado por estudiantes enfocados en el desarrollo de proyectos tecnológicos. En este laboratorio se integra el desarrollo de software lógico con la instalación eléctrica y electrónica para crear herramientas como sistemas de control de acceso o detectores mediante inteligencia artificial y tambien este asistente virtual.
+
+Trámite de Justificantes: Para justificar inasistencias por motivos de salud, el estudiante debe acudir al área correspondiente en los primeros días posteriores a la falta, presentando la receta médica oficial o el documento probatorio.
+
+
+
+

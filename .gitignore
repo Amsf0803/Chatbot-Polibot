@@ -7,9 +7,9 @@ ENV/
 instance/
 .webassets-cache
 secret_key.py
+.env
 
-# Base de datos de conocimiento (RAG)
-conocimiento_cecyt16.txt
+
 
 # Base de datos vectorial (si estás usando persistencia local con ChromaDB)
 chroma.db
@@ -22,3 +22,5 @@ __pycache__/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+
+
